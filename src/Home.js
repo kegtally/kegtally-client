@@ -1,7 +1,6 @@
 "use strict";
 
 import React, { Component } from "react";
-import QRCodeScanner from "react-native-qrcode-scanner";
 import {
   AppRegistry,
   StyleSheet,
@@ -11,59 +10,13 @@ import {
   Modal
 } from "react-native";
 import Icon from "./components/Icon.js";
-import LiveInventory from "./LiveInventory.js";
-import SelectBatch from "./SelectBatch.js";
 import Container from "./components/Container.js";
 
 export default class Home extends Component {
-  state = { kegsForSale: [] };
-  onRead = e => {
-    fetch(`http://172.46.2.255:8000/inventory/kegs/${e.data}`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      }
-    })
-      .then(res => {
-        return res.json();
-      })
-      .then(j => {
-        if (j.status === null) {
-          //Keg's empty... better put somthing in it
-          this.props.navigator.push(
-            {
-              title: "Select Batch",
-              component: SelectBatch,
-              passProps: {
-                kegId: e.data
-              }
-            },
-            this.scanner.reactivate()
-          );
-        } else {
-          //Keg's full... better sell it
-          this.setState({ kegsForSale: this.state.kegsForSale.push(j) });
-        }
-      });
-  };
-
-  componentDidMount() {
-    //this.scanner.reactivate();
-  }
-
   render() {
     const { navigator } = this.props;
     return (
       <Container>
-        <QRCodeScanner
-          showMarker
-          topViewStyle={styles.zeroContainer}
-          bottomViewStyle={styles.zeroContainer}
-          cameraStyle={styles.cameraContainer}
-          onRead={this.onRead}
-          ref={n => (this.scanner = n)}
-        />
         <View style={styles.bottomPanel}>
           <Icon name="keg" color="#fff" style={styles.icon} />
           <Icon
