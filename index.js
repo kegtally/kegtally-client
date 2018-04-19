@@ -1,5 +1,5 @@
 "use strict";
 import { AppRegistry } from "react-native";
-import Home from "./src/Home.js";
+import App from "./src";
 
-AppRegistry.registerComponent("KegTally", () => Home);
+AppRegistry.registerComponent("KegTally", () => App);

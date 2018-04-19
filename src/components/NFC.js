@@ -19,7 +19,8 @@ class NFC extends Component {
       enabled: false,
       isWriting: false,
       urlToWrite: "google.com",
-      tag: {}
+      tag: {},
+      keg: {}
     };
   }
 
@@ -39,14 +40,13 @@ class NFC extends Component {
   }
 
   render() {
-    let { supported, enabled, tag, isWriting, urlToWrite } = this.state;
+    let { supported, enabled, tag, isWriting, urlToWrite, keg } = this.state;
     return (
       <ScrollView style={{ flex: 1 }}>
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <Text>{`Is NFC supported ? ${supported}`}</Text>
-          <Text>{`Is NFC enabled (Android only)? ${enabled}`}</Text>
+          <Text>{`Keg Tally 0.0.1`}</Text>
 
           <TouchableOpacity
             style={{ marginTop: 20 }}
@@ -69,14 +69,7 @@ class NFC extends Component {
             <Text>Clear</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={{ marginTop: 20 }}
-            onPress={this._goToNfcSetting}
-          >
-            <Text>(android) Go to NFC setting</Text>
-          </TouchableOpacity>
-
-          {
+          {/* {
             <View
               style={{ padding: 10, marginTop: 20, backgroundColor: "#e0e0e0" }}
             >
@@ -122,10 +115,14 @@ class NFC extends Component {
                 }`}</Text>
               </TouchableOpacity>
             </View>
-          }
+          } */}
 
           <Text style={{ marginTop: 20 }}>{`Current tag JSON: ${JSON.stringify(
             tag
+          )}`}</Text>
+
+          <Text style={{ marginTop: 20 }}>{`Current keg JSON: ${JSON.stringify(
+            keg
           )}`}</Text>
         </View>
       </ScrollView>
@@ -234,12 +231,36 @@ class NFC extends Component {
   _onTagDiscovered = tag => {
     console.log("Tag Discovered", tag);
     this.setState({ tag });
-    let url = this._parseUri(tag);
-    if (url) {
-      Linking.openURL(url).catch(err => {
-        console.warn(err);
-      });
-    }
+    //let url = this._parseUri(tag);
+    this._fetchKeg(tag.id);
+    // if (url) {
+    //   Linking.openURL(url).catch(err => {
+    //     console.warn(err);
+    //   });
+    // }
+  };
+
+  _fetchKeg = id => {
+    fetch("https://radiant-refuge-35147.herokuapp.com/graphql/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `{
+        keg(tag: "${id}") {
+          id,
+          fill {
+            batch {
+            beer {
+              name
+            }
+          }
+          }
+        }
+      }`
+      })
+    })
+      .then(res => res.json())
+      .then(res => this.setState({ keg: res }));
   };
 
   _startDetection = () => {
@@ -263,7 +284,7 @@ class NFC extends Component {
   };
 
   _clearMessages = () => {
-    this.setState({ tag: null });
+    this.setState({ tag: null, keg: null });
   };
 
   _goToNfcSetting = () => {
