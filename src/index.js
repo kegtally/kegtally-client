@@ -4,6 +4,7 @@ import { ApolloProvider } from "react-apollo";
 import { Text, SafeAreaView, StyleSheet } from "react-native";
 import Home from "./screens/Home.js";
 import AddNewKeg from "./screens/AddNewKeg.js";
+import { Root } from "./routes";
 
 export default class AppContainer extends Component {
   constructor(props) {
@@ -21,7 +22,7 @@ export default class AppContainer extends Component {
     return (
       <ApolloProvider client={client}>
         <SafeAreaView style={styles.SafeArea}>
-          <Home />
+          <Root />
         </SafeAreaView>
       </ApolloProvider>
     );

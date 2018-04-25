@@ -18,7 +18,6 @@ class NFC extends Component {
       supported: true,
       enabled: false,
       isWriting: false,
-      urlToWrite: "google.com",
       tag: {},
       keg: {}
     };
@@ -40,7 +39,7 @@ class NFC extends Component {
   }
 
   render() {
-    let { supported, enabled, tag, isWriting, urlToWrite, keg } = this.state;
+    let { supported, enabled, tag, isWriting, keg } = this.state;
     return (
       <ScrollView style={{ flex: 1 }}>
         <View
@@ -69,54 +68,6 @@ class NFC extends Component {
             <Text>Clear</Text>
           </TouchableOpacity>
 
-          {/* {
-            <View
-              style={{ padding: 10, marginTop: 20, backgroundColor: "#e0e0e0" }}
-            >
-              <Text>(android) Write NDEF Test</Text>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text>http://www.</Text>
-                <TextInput
-                  style={{ width: 200 }}
-                  value={urlToWrite}
-                  onChangeText={urlToWrite => this.setState({ urlToWrite })}
-                />
-              </View>
-
-              <TouchableOpacity
-                style={{
-                  marginTop: 20,
-                  borderWidth: 1,
-                  borderColor: "blue",
-                  padding: 10
-                }}
-                onPress={
-                  isWriting ? this._cancelNdefWrite : this._requestNdefWrite
-                }
-              >
-                <Text style={{ color: "blue" }}>{`(android) ${
-                  isWriting ? "Cancel" : "Write NDEF"
-                }`}</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={{
-                  marginTop: 20,
-                  borderWidth: 1,
-                  borderColor: "blue",
-                  padding: 10
-                }}
-                onPress={
-                  isWriting ? this._cancelNdefWrite : this._requestFormat
-                }
-              >
-                <Text style={{ color: "blue" }}>{`(android experimental) ${
-                  isWriting ? "Cancel" : "Format"
-                }`}</Text>
-              </TouchableOpacity>
-            </View>
-          } */}
-
           <Text style={{ marginTop: 20 }}>{`Current tag JSON: ${JSON.stringify(
             tag
           )}`}</Text>
@@ -128,51 +79,6 @@ class NFC extends Component {
       </ScrollView>
     );
   }
-
-  _requestFormat = () => {
-    let { isWriting } = this.state;
-    if (isWriting) {
-      return;
-    }
-
-    this.setState({ isWriting: true });
-    NfcManager.requestNdefWrite(null, { format: true })
-      .then(() => console.log("format completed"))
-      .catch(err => console.warn(err))
-      .then(() => this.setState({ isWriting: false }));
-  };
-
-  _requestNdefWrite = () => {
-    function strToBytes(str) {
-      let result = [];
-      for (let i = 0; i < str.length; i++) {
-        result.push(str.charCodeAt(i));
-      }
-      return result;
-    }
-
-    let { isWriting, urlToWrite } = this.state;
-    if (isWriting) {
-      return;
-    }
-
-    const urlBytes = strToBytes(urlToWrite);
-    const headerBytes = [0xd1, 0x01, urlBytes.length + 1, 0x55, 0x01];
-    const bytes = [...headerBytes, ...urlBytes];
-
-    this.setState({ isWriting: true });
-    NfcManager.requestNdefWrite(bytes)
-      .then(() => console.log("write completed"))
-      .catch(err => console.warn(err))
-      .then(() => this.setState({ isWriting: false }));
-  };
-
-  _cancelNdefWrite = () => {
-    this.setState({ isWriting: false });
-    NfcManager.cancelNdefWrite()
-      .then(() => console.log("write cancelled"))
-      .catch(err => console.warn(err));
-  };
 
   _startNfc() {
     NfcManager.start({
@@ -229,15 +135,8 @@ class NFC extends Component {
   }
 
   _onTagDiscovered = tag => {
-    console.log("Tag Discovered", tag);
     this.setState({ tag });
-    //let url = this._parseUri(tag);
     this._fetchKeg(tag.id);
-    // if (url) {
-    //   Linking.openURL(url).catch(err => {
-    //     console.warn(err);
-    //   });
-    // }
   };
 
   _fetchKeg = id => {
